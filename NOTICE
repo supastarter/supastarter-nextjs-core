@@ -1,0 +1,19 @@
+supastarter core
+Copyright (c) 2026 supastarter
+
+This NOTICE lists third-party source code that is copied into (vendored in)
+this repository and shipped as part of supastarter. Dependencies installed
+from the npm registry are not listed here; their licenses travel with the
+packages in node_modules.
+
+When vendoring third-party code, add an entry below with the project name,
+upstream URL, the copied paths, the copyright line and the full license text.
+
+--------------------------------------------------------------------------------
+Vendored third-party code
+--------------------------------------------------------------------------------
+
+None yet.
+
+Planned: shadcn/ui (https://github.com/shadcn-ui/ui, MIT License) will be added
+in a later phase together with its copyright notice and license text.

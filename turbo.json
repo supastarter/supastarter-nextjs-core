@@ -1,0 +1,34 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "envMode": "strict",
+  "globalDependencies": [".nvmrc", "tooling/**"],
+  "tasks": {
+    "format:check": {},
+    "lint": {
+      "dependsOn": ["type-check"]
+    },
+    "type-check": {
+      "outputs": [".next/types/**", "next-env.d.ts", "src/routeTree.gen.ts"]
+    },
+    "test": {
+      "outputs": []
+    },
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "test:e2e": {
+      "cache": false
+    },
+    "format": {
+      "cache": false
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

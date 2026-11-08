@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./tooling/oxc/oxlint/base.json"],
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "no-console": "off"
+  },
+  "ignorePatterns": ["variants/**"]
+}

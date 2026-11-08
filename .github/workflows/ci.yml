@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  workspace:
+    name: Workspace contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check:root
+
+  variant:
+    name: ${{ matrix.variant }} verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [nextjs, tanstack-start]
+    defaults:
+      run:
+        working-directory: variants/${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Installs only this variant and the shared tooling it declares, which
+      # proves the variant does not depend on its sibling.
+      - run: pnpm install --frozen-lockfile --filter "./variants/${{ matrix.variant }}..."
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run verify
+      - name: Ensure verify did not modify tracked or handwritten files
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-${{ matrix.variant }}
+          path: |
+            variants/${{ matrix.variant }}/playwright-report
+            variants/${{ matrix.variant }}/test-results
+          if-no-files-found: ignore
+          retention-days: 7

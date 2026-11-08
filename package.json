@@ -1,0 +1,31 @@
+{
+  "name": "supastarter-core",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22.22.0",
+    "pnpm": "12.18.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "check": "pnpm run check:root && turbo run format:check lint type-check test",
+    "check:root": "node scripts/check-variants.mjs && pnpm run guidance:check && oxfmt --check && oxlint --deny-warnings scripts tooling",
+    "guidance:check": "node scripts/guidance-check.mjs",
+    "format": "oxfmt && turbo run format",
+    "format:check": "oxfmt --check && turbo run format:check",
+    "lint": "oxlint --deny-warnings scripts tooling && turbo run lint",
+    "lint:fix": "oxlint --fix scripts tooling && turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test --",
+    "build": "turbo run build",
+    "test:e2e": "turbo run test:e2e --concurrency=1",
+    "verify": "pnpm run check && pnpm run test:e2e"
+  },
+  "devDependencies": {
+    "@repo/oxc-config": "workspace:*",
+    "oxfmt": "0.77.0",
+    "oxlint": "1.92.0",
+    "turbo": "2.11.10"
+  }
+}
