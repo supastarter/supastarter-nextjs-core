@@ -11,7 +11,9 @@ database, API layer, UI kit or product features yet.
 ├── package.json            # maintainer scripts (turbo across both variants)
 ├── pnpm-workspace.yaml     # tooling/* + variants/*, one lockfile
 ├── turbo.json              # task graph, strict env mode, no global env wildcard
-├── scripts/                # root-only checks (command contract, guidance stub, dev launcher)
+├── AGENTS.md               # agent guidance for this maintainer workspace
+├── docs/                   # architecture.md, decisions/
+├── scripts/                # maintainer-only checks (command contract, guidance) and dev launcher
 ├── tooling/
 │   ├── typescript/         # @repo/typescript-config: strict base + nextjs / tanstack-start presets
 │   └── oxc/                # @repo/oxc-config: shared Oxlint (type-aware) + Oxfmt config
@@ -23,6 +25,11 @@ database, API layer, UI kit or product features yet.
 Each variant declares all of its own dependencies and scripts. It depends only on the shared
 `tooling/*` packages. CI installs each variant on its own with a filtered install, which proves it
 does not need its sibling.
+
+Customer projects are a Turborepo monorepo. The chosen variant is copied unchanged to `apps/web`,
+next to `packages/` and `tooling/`. See [`docs/architecture.md`](docs/architecture.md) for the
+mapping and [decision 0001](docs/decisions/0001-customer-project-is-a-turborepo-with-apps-web.md)
+for the rationale.
 
 ## Versions
 
@@ -68,7 +75,7 @@ non-zero on failure. None of them watch, prompt or swallow errors.
 | `pnpm format:check`     | Oxfmt check. Never writes files                                                                                                                                                                                                                                  |
 | `pnpm test`             | Vitest one-shot (`vitest run`). Fails when no test files match                                                                                                                                                                                                   |
 | `pnpm test -- <filter>` | Run a single test file or filter. Example: `pnpm test -- src/lib/env.test.ts` in a variant root. Flags like `-t "<name>"` are forwarded too                                                                                                                      |
-| `pnpm check`            | Fast read-only check: format, types, lint, unit tests. Root also runs the command-contract check and `guidance:check` (stub until AGENTS.md lands)                                                                                                               |
+| `pnpm check`            | Fast read-only check: format, types, lint, unit tests. Root also runs the command-contract and extractability check plus `guidance:check` (AGENTS.md, architecture doc, decision records)                                                                        |
 | `pnpm build`            | Production build, no secrets or external services                                                                                                                                                                                                                |
 | `pnpm test:e2e`         | Production build, then Playwright starts the production server (Next.js :3100, TanStack Start :3101), waits for `/api/health`, runs the smoke tests and stops the server. Leaves `playwright-report/` and `test-results/` with traces and screenshots on failure |
 | `pnpm verify`           | `check` + `test:e2e` (production build + browser smoke)                                                                                                                                                                                                          |
@@ -84,7 +91,7 @@ leaves any change in `git status`.
 `.github/workflows/ci.yml` runs on each push to `main` and on pull requests:
 
 - **Workspace contract**: `pnpm run check:root` (variant script contract, suppression-comment ban,
-  guidance stub, root format and lint).
+  extractability to `apps/web`, guidance check, root format and lint).
 - **nextjs verify** / **tanstack-start verify**: a filtered install of only that variant, then
   `pnpm run verify` in the variant root, then a clean `git status` check. Playwright artifacts are
   uploaded on failure.
