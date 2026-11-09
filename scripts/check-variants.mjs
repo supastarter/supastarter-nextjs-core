@@ -1,6 +1,6 @@
-// Asserts that every framework variant implements the full command contract and
-// keeps its sources free of suppression comments, so that turbo or CI can never
-// pass by silently skipping a missing task.
+// Asserts that every framework variant implements the full command contract,
+// keeps its sources free of suppression comments and stays extractable to
+// `apps/web`, so that turbo or CI can never pass by silently skipping a task.
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -36,6 +36,32 @@ const FORBIDDEN_PATTERNS = [
   /prettier-ignore/,
 ];
 
+// Variants are copied unchanged to `apps/web` in customer projects
+// (docs/decisions/0001-*), so they must not reach outside their own directory.
+const EXTRACT_SCAN_EXTENSIONS = new Set([...SOURCE_EXTENSIONS, ".json", ".css"]);
+const EXTRACT_SKIP_DIRS = new Set([
+  "node_modules",
+  ".next",
+  "dist",
+  ".output",
+  ".tanstack",
+  ".turbo",
+  "test-results",
+  "playwright-report",
+  "blob-report",
+]);
+const EXTRACT_FORBIDDEN = [
+  {
+    pattern: /(?:\.\.\/)+(?:tooling|variants|packages|apps)\//,
+    reason: "relative path into a top-level workspace directory (use a @repo/* package instead)",
+  },
+  { pattern: /\bvariants\//, reason: "reference to the maintainer variants/ directory" },
+  {
+    pattern: new RegExp(`@repo/(?:${EXPECTED_VARIANTS.join("|")})\\b`),
+    reason: "reference to a maintainer variant package name",
+  },
+];
+
 /** @type {string[]} */
 const errors = [];
 
@@ -55,6 +81,25 @@ function* walk(dir) {
     if (entry.isDirectory()) {
       yield* walk(full);
     } else if (SOURCE_EXTENSIONS.has(path.extname(entry.name))) {
+      yield full;
+    }
+  }
+}
+
+/**
+ * @param {string} dir
+ * @returns {Generator<string>}
+ */
+function* walkVariant(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (!EXTRACT_SKIP_DIRS.has(entry.name)) yield* walkVariant(full);
+    } else if (
+      EXTRACT_SCAN_EXTENSIONS.has(path.extname(entry.name)) &&
+      !GENERATED_FILES.has(entry.name) &&
+      entry.name !== "next-env.d.ts"
+    ) {
       yield full;
     }
   }
@@ -114,6 +159,19 @@ for (const variant of EXPECTED_VARIANTS) {
       }
     }
   }
+
+  for (const file of walkVariant(variantRoot)) {
+    const fileRel = path.relative(root, file);
+    let content = readFileSync(file, "utf8");
+    if (path.relative(variantRoot, file) === "package.json") {
+      content = content.replace(/^\s*"name":.*$/m, "");
+    }
+    for (const { pattern, reason } of EXTRACT_FORBIDDEN) {
+      if (pattern.test(content)) {
+        errors.push(`${fileRel}: not extractable to apps/web: ${reason}`);
+      }
+    }
+  }
 }
 
 if (errors.length > 0) {
@@ -122,4 +180,6 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`check-variants: ${EXPECTED_VARIANTS.length} variants satisfy the command contract`);
+console.log(
+  `check-variants: ${EXPECTED_VARIANTS.length} variants satisfy the command contract and are extractable`,
+);
