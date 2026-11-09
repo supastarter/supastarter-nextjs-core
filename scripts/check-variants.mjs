@@ -1,6 +1,7 @@
 // Asserts that every framework variant implements the full command contract,
-// keeps its sources free of suppression comments and stays extractable to
-// `apps/web`, so that turbo or CI can never pass by silently skipping a task.
+// keeps its sources free of suppression comments and is self-contained (no
+// references outside its own folder), so that turbo or CI can never pass by
+// silently skipping a task.
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -36,10 +37,10 @@ const FORBIDDEN_PATTERNS = [
   /prettier-ignore/,
 ];
 
-// Variants are copied unchanged to `apps/web` in customer projects
-// (docs/decisions/0001-*), so they must not reach outside their own directory.
-const EXTRACT_SCAN_EXTENSIONS = new Set([...SOURCE_EXTENSIONS, ".json", ".css"]);
-const EXTRACT_SKIP_DIRS = new Set([
+// Variants must work from their own folder alone (docs/architecture.md,
+// "Self-contained variants").
+const SELF_CONTAINED_SCAN_EXTENSIONS = new Set([...SOURCE_EXTENSIONS, ".json", ".css"]);
+const SELF_CONTAINED_SKIP_DIRS = new Set([
   "node_modules",
   ".next",
   "dist",
@@ -50,15 +51,15 @@ const EXTRACT_SKIP_DIRS = new Set([
   "playwright-report",
   "blob-report",
 ]);
-const EXTRACT_FORBIDDEN = [
+const SELF_CONTAINED_FORBIDDEN = [
   {
     pattern: /(?:\.\.\/)+(?:tooling|variants|packages|apps)\//,
     reason: "relative path into a top-level workspace directory (use a @repo/* package instead)",
   },
-  { pattern: /\bvariants\//, reason: "reference to the maintainer variants/ directory" },
+  { pattern: /\bvariants\//, reason: "reference to the variants/ directory" },
   {
     pattern: new RegExp(`@repo/(?:${EXPECTED_VARIANTS.join("|")})\\b`),
-    reason: "reference to a maintainer variant package name",
+    reason: "reference to a variant package name",
   },
 ];
 
@@ -94,9 +95,9 @@ function* walkVariant(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!EXTRACT_SKIP_DIRS.has(entry.name)) yield* walkVariant(full);
+      if (!SELF_CONTAINED_SKIP_DIRS.has(entry.name)) yield* walkVariant(full);
     } else if (
-      EXTRACT_SCAN_EXTENSIONS.has(path.extname(entry.name)) &&
+      SELF_CONTAINED_SCAN_EXTENSIONS.has(path.extname(entry.name)) &&
       !GENERATED_FILES.has(entry.name) &&
       entry.name !== "next-env.d.ts"
     ) {
@@ -166,9 +167,9 @@ for (const variant of EXPECTED_VARIANTS) {
     if (path.relative(variantRoot, file) === "package.json") {
       content = content.replace(/^\s*"name":.*$/m, "");
     }
-    for (const { pattern, reason } of EXTRACT_FORBIDDEN) {
+    for (const { pattern, reason } of SELF_CONTAINED_FORBIDDEN) {
       if (pattern.test(content)) {
-        errors.push(`${fileRel}: not extractable to apps/web: ${reason}`);
+        errors.push(`${fileRel}: references outside the variant folder: ${reason}`);
       }
     }
   }
@@ -181,5 +182,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `check-variants: ${EXPECTED_VARIANTS.length} variants satisfy the command contract and are extractable`,
+  `check-variants: ${EXPECTED_VARIANTS.length} variants satisfy the command contract and are self-contained`,
 );
