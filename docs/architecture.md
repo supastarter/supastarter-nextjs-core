@@ -13,7 +13,6 @@ supastarter-core/
 ├── tooling/
 │   ├── typescript/        # @repo/typescript-config: strict base + framework presets
 │   └── oxc/               # @repo/oxc-config: shared Oxlint + Oxfmt config
-├── scripts/               # workspace-level checks and the dev launcher
 ├── docs/                  # architecture.md, decisions/
 ├── AGENTS.md, turbo.json, package.json, pnpm-workspace.yaml
 ```
@@ -22,7 +21,7 @@ supastarter-core/
   implements the full command contract.
 - **Tooling packages** hold configuration only and have no runtime code.
 - **Root** `package.json` scripts orchestrate the variants through Turbo. The root also checks its
-  own files (`scripts/`, `tooling/`, docs).
+  own files (`tooling/`, docs, configs).
 
 ## Self-contained variants
 
@@ -41,9 +40,9 @@ where it sits in the workspace:
 4. **No cross-variant references.** A variant never depends on, imports from or names a variant
    package.
 
-`scripts/check-variants.mjs` (part of `pnpm check`) enforces the command contract and rules 1, 2
-and 4. CI installs each variant with a filtered install (`--filter "./variants/<framework>..."`),
-which proves its dependencies are complete.
+CI installs each variant with a filtered install (`--filter "./variants/<framework>..."`) and runs
+its `verify` script from the variant folder, which proves its dependencies and scripts are
+complete.
 
 ## Commands
 

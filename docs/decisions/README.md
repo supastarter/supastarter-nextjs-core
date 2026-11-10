@@ -6,9 +6,6 @@ decision. It starts empty.
 Name files `NNNN-short-kebab-title.md` (for example `0001-use-stripe-for-billing.md`) and number
 them in order. Don't rewrite an accepted decision. Add a new record that supersedes it instead.
 
-`pnpm guidance:check` (part of `pnpm check`) validates the file name and required sections of every
-record in this folder.
-
 ## Template
 
 ```md

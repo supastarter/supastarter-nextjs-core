@@ -13,7 +13,6 @@ database, API layer, UI kit or product features yet.
 ├── turbo.json              # task graph, strict env mode, no global env wildcard
 ├── AGENTS.md               # agent guidance
 ├── docs/                   # architecture.md, decisions/
-├── scripts/                # workspace checks (command contract, guidance) and dev launcher
 ├── tooling/
 │   ├── typescript/         # @repo/typescript-config: strict base + nextjs / tanstack-start presets
 │   └── oxc/                # @repo/oxc-config: shared Oxlint (type-aware) + Oxfmt config
@@ -66,13 +65,13 @@ non-zero on failure. None of them watch, prompt or swallow errors.
 
 | Command                 | What it does                                                                                                                                                                                                                                                     |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`              | Variant root: start that app (Next.js :3000, TanStack Start :3001). Root: `pnpm dev nextjs` or `pnpm dev tanstack-start`                                                                                                                                         |
+| `pnpm dev`              | Variant root: start that app (Next.js :3000, TanStack Start :3001). Root: `pnpm dev @repo/nextjs` or `pnpm dev @repo/tanstack-start` (Turbo filter, required)                                                                                                    |
 | `pnpm type-check`       | Runs framework typegen (`next typegen` / route tree generation), then `tsc --noEmit`                                                                                                                                                                             |
 | `pnpm lint`             | Oxlint with type-aware rules, warnings fail. Never writes files                                                                                                                                                                                                  |
 | `pnpm format:check`     | Oxfmt check. Never writes files                                                                                                                                                                                                                                  |
 | `pnpm test`             | Vitest one-shot (`vitest run`). Fails when no test files match                                                                                                                                                                                                   |
 | `pnpm test -- <filter>` | Run a single test file or filter. Example: `pnpm test -- src/lib/env.test.ts` in a variant root. Flags like `-t "<name>"` are forwarded too                                                                                                                      |
-| `pnpm check`            | Fast read-only check: format, types, lint, unit tests. Root also runs the command-contract and self-containment check plus `guidance:check` (AGENTS.md, architecture doc, format of any decision records)                                                        |
+| `pnpm check`            | Fast read-only check: format, types, lint, unit tests. Root also checks its own files (`tooling/`, docs, configs)                                                                                                                                                |
 | `pnpm build`            | Production build, no secrets or external services                                                                                                                                                                                                                |
 | `pnpm test:e2e`         | Production build, then Playwright starts the production server (Next.js :3100, TanStack Start :3101), waits for `/api/health`, runs the smoke tests and stops the server. Leaves `playwright-report/` and `test-results/` with traces and screenshots on failure |
 | `pnpm verify`           | `check` + `test:e2e` (production build + browser smoke)                                                                                                                                                                                                          |
@@ -87,8 +86,7 @@ leaves any change in `git status`.
 
 `.github/workflows/ci.yml` runs on each push to `main` and on pull requests:
 
-- **Workspace contract**: `pnpm run check:root` (variant script contract, suppression-comment ban,
-  no references outside each variant folder, guidance check, root format and lint).
+- **Workspace**: `pnpm run check:root` (format and lint of root-level files).
 - **nextjs verify** / **tanstack-start verify**: a filtered install of only that variant, then
   `pnpm run verify` in the variant root, then a clean `git status` check. Playwright artifacts are
   uploaded on failure.

@@ -28,6 +28,6 @@ Guidance for agents working in this repository.
 From the workspace root, or the same commands inside a variant folder:
 
 ```sh
-pnpm check    # format, types, lint, unit tests (+ contract and guidance checks at the root)
+pnpm check    # format, types, lint, unit tests (+ root-level files at the root)
 pnpm verify   # check + production build + Playwright smoke
 ```

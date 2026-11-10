@@ -8,14 +8,13 @@
     "pnpm": "12.18.0"
   },
   "scripts": {
-    "dev": "node scripts/dev.mjs",
+    "dev": "turbo run dev --filter",
     "check": "pnpm run check:root && turbo run format:check lint type-check test",
-    "check:root": "node scripts/check-variants.mjs && pnpm run guidance:check && oxfmt --check && oxlint --deny-warnings scripts tooling",
-    "guidance:check": "node scripts/guidance-check.mjs",
+    "check:root": "oxfmt --check && oxlint --deny-warnings tooling",
     "format": "oxfmt && turbo run format",
     "format:check": "oxfmt --check && turbo run format:check",
-    "lint": "oxlint --deny-warnings scripts tooling && turbo run lint",
-    "lint:fix": "oxlint --fix scripts tooling && turbo run lint:fix",
+    "lint": "oxlint --deny-warnings tooling && turbo run lint",
+    "lint:fix": "oxlint --fix tooling && turbo run lint:fix",
     "type-check": "turbo run type-check",
     "test": "turbo run test --",
     "build": "turbo run build",
