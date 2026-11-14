@@ -15,7 +15,6 @@ permissions:
 env:
   CI: "true"
   NEXT_TELEMETRY_DISABLED: "1"
-  EXPO_NO_TELEMETRY: "1"
 
 jobs:
   check:
@@ -66,6 +65,8 @@ jobs:
     name: Mobile bundle
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      EXPO_NO_TELEMETRY: "1"
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
