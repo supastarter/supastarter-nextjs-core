@@ -1,33 +1,35 @@
 # AGENTS.md
 
-Guidance for agents working in this repository.
+Guidance for agents working in this repository. [`docs/architecture.md`](docs/architecture.md)
+explains how the apps and packages fit together.
 
-## Layout
+## Where things go
 
-- `variants/nextjs` and `variants/tanstack-start` are technical framework shells. Each one is a
-  self-contained workspace package.
-- `tooling/typescript` and `tooling/oxc` hold the shared TypeScript, Oxlint and Oxfmt config.
-- Details: [`docs/architecture.md`](docs/architecture.md).
+- API procedures: `packages/api/src/router.ts`. Validate every input with Zod.
+- Web pages and routes: `apps/web/src/app`. Mobile screens: `apps/mobile/src/app` (Expo Router).
+- Colors and radii: `packages/ui/theme.css`. Never hard-code colors in components.
+- Logic shared by both apps belongs in a package, not in an app. Keep mobile screens thin.
+- UI components: add them with the shadcn CLI (web) or the React Native Reusables CLI (mobile),
+  then edit the copied files. Don't hand-write a component either CLI provides.
+- Environment variables: declare them in the app's `src/env.ts`, read them only through `env`, and
+  list them in the app's `.env.example`.
 
 ## Rules
 
-- Keep variants self-contained (see "Self-contained variants" in `docs/architecture.md`):
-  - Reference shared config only through `@repo/*` workspace packages, never `../../tooling`.
-  - Never use paths that leave the variant folder.
-  - Never reference another variant.
-- Make a change in both variants unless it is framework-specific.
-- Use only pnpm, TypeScript `strict`, Oxlint and Oxfmt. No ESLint or Prettier. No `any`,
-  `@ts-ignore` or lint/format-disable comments.
-- Unit tests are `src/**/*.test.ts` (Vitest). Browser smoke tests are `e2e/**/*.spec.ts`
+- pnpm only. TypeScript strict, Oxlint and Oxfmt. No ESLint or Prettier.
+- No `any`, `@ts-ignore`, or lint or format disable comments.
+- Pin exact dependency versions. Keep each package's dependencies in its own `package.json`.
+- Unit tests are `src/**/*.test.ts` (Vitest). Web end-to-end tests are `apps/web/e2e/*.spec.ts`
   (Playwright).
 - Record product decisions in `docs/decisions/NNNN-title.md` using the template in
   [`docs/decisions/README.md`](docs/decisions/README.md).
 
 ## Before you finish
 
-From the workspace root, or the same commands inside a variant folder:
+Run from the repository root:
 
 ```sh
-pnpm check    # format, types, lint, unit tests (+ root-level files at the root)
-pnpm verify   # check + production build + Playwright smoke
+pnpm format   # fix formatting
+pnpm check    # format check, lint, type-check, unit tests
+pnpm verify   # check + production builds + web end-to-end tests
 ```

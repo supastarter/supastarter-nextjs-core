@@ -15,10 +15,11 @@ permissions:
 env:
   CI: "true"
   NEXT_TELEMETRY_DISABLED: "1"
+  EXPO_NO_TELEMETRY: "1"
 
 jobs:
-  workspace:
-    name: Workspace
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -28,19 +29,14 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run check:root
+      - run: pnpm check
+      - name: Ensure no tracked files changed
+        run: git diff --exit-code
 
-  variant:
-    name: ${{ matrix.variant }} verify
+  web:
+    name: Web build + e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: [nextjs, tanstack-start]
-    defaults:
-      run:
-        working-directory: variants/${{ matrix.variant }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -48,21 +44,37 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      # Installs only this variant and the shared tooling it declares, which
-      # proves the variant does not depend on its sibling.
-      - run: pnpm install --frozen-lockfile --filter "./variants/${{ matrix.variant }}..."
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run verify
-      - name: Ensure verify did not modify tracked or handwritten files
-        run: |
-          git status --porcelain
-          test -z "$(git status --porcelain)"
+      # Installs only the web app and the packages it uses.
+      - run: pnpm install --frozen-lockfile --filter "web..."
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm --filter web build
+      - run: pnpm --filter web test:e2e
+      - name: Ensure no tracked files changed
+        run: test -z "$(git status --porcelain)" || (git status --porcelain && exit 1)
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-${{ matrix.variant }}
+          name: playwright
           path: |
-            variants/${{ matrix.variant }}/playwright-report
-            variants/${{ matrix.variant }}/test-results
+            apps/web/playwright-report
+            apps/web/test-results
           if-no-files-found: ignore
           retention-days: 7
+
+  # Delete this job together with apps/mobile.
+  mobile:
+    name: Mobile bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Installs only the mobile app and the packages it uses.
+      - run: pnpm install --frozen-lockfile --filter "mobile..."
+      - run: pnpm --filter mobile build
+      - name: Ensure no tracked files changed
+        run: test -z "$(git status --porcelain)" || (git status --porcelain && exit 1)

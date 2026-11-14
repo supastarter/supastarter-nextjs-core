@@ -1,95 +1,82 @@
-# supastarter-core
+# supastarter
 
-Technical core for supastarter 3.0: one maintainer workspace with shared tooling and two isolated
-framework variants (Next.js and TanStack Start). This is a technical shell only. It has no auth,
-database, API layer, UI kit or product features yet.
+A TypeScript monorepo for building a web app and a mobile app on one typed API.
 
-## Layout
+| Path           | What it is                                                                       |
+| -------------- | -------------------------------------------------------------------------------- |
+| `apps/web`     | Next.js app. Serves the pages and the API at `/api/rpc`                          |
+| `apps/mobile`  | Expo (React Native) app for iOS and Android. Calls the API served by the web app |
+| `packages/api` | API procedures (oRPC + Zod), the request handler and a typed client              |
+| `packages/ui`  | Design tokens (colors, radii) shared by both apps                                |
+| `tooling/*`    | Shared TypeScript and Oxlint configuration                                       |
 
-```
-.
-├── package.json            # maintainer scripts (turbo across both variants)
-├── pnpm-workspace.yaml     # tooling/* + variants/*, one lockfile
-├── turbo.json              # task graph, strict env mode, no global env wildcard
-├── AGENTS.md               # agent guidance
-├── docs/                   # architecture.md, decisions/
-├── tooling/
-│   ├── typescript/         # @repo/typescript-config: strict base + nextjs / tanstack-start presets
-│   └── oxc/                # @repo/oxc-config: shared Oxlint (type-aware) + Oxfmt config
-└── variants/
-    ├── nextjs/             # @repo/nextjs: Next.js App Router shell
-    └── tanstack-start/     # @repo/tanstack-start: TanStack Start (Vite) shell
-```
+The web app uses Tailwind CSS and shadcn/ui. The mobile app uses Uniwind (Tailwind CSS for React
+Native) and React Native Reusables, the React Native port of shadcn/ui. Both read the same tokens
+from `packages/ui/theme.css` and follow the system light or dark mode.
 
-Each variant declares all of its own dependencies and scripts. It depends only on the shared
-`tooling/*` packages. CI installs each variant on its own with a filtered install, which proves it
-does not need its sibling.
+See [`docs/architecture.md`](docs/architecture.md) for how the pieces fit together.
 
-See [`docs/architecture.md`](docs/architecture.md) for the rules that keep variants self-contained.
+## Requirements
 
-## Versions
+- Node.js 26, the active LTS release (`.nvmrc`)
+- pnpm 12.18.0. Node 26 no longer ships Corepack, so install it with `npm install -g pnpm@12.18.0`
 
-| Tool            | Version                                   |
-| --------------- | ----------------------------------------- |
-| Node.js         | `>=22.22.0` (`.nvmrc`: 22)                |
-| pnpm            | `12.18.0` (exact)                         |
-| TypeScript      | `7.0.2`                                   |
-| Next.js         | `16.4.5`                                  |
-| React           | `19.3.1`                                  |
-| TanStack Start  | `1.169.5`                                 |
-| TanStack Router | `1.170.46`                                |
-| Vite            | `8.3.6`                                   |
-| srvx            | `1.0.8`                                   |
-| Turbo           | `2.11.10`                                 |
-| Oxlint          | `1.92.0` (+ `oxlint-tsgolint` `7.0.2006`) |
-| Oxfmt           | `0.77.0`                                  |
-| Vitest          | `5.1.0`                                   |
-| Playwright      | `1.65.0`                                  |
-
-## Setup
+## Getting started
 
 ```sh
-nvm use                                  # Node 22 from .nvmrc
-corepack enable                          # uses pnpm@12.18.0 from package.json
-pnpm install --frozen-lockfile
-pnpm --dir variants/nextjs exec playwright install --with-deps chromium   # once, for e2e
+nvm use
+pnpm install
+pnpm dev
 ```
 
-No environment variables are needed. See each variant's `.env.example`.
+`pnpm dev` starts the web app on http://localhost:3000 and the Expo dev server side by side. To use
+Expo's keyboard shortcuts (`i` for the iOS simulator, `a` for the Android emulator), run the mobile
+app in its own terminal with `pnpm --filter mobile dev`, or scan its QR code with Expo Go. The
+mobile app calls the API of the running web app.
+
+No environment variables are required. Each app lists the variables it reads in its own
+`.env.example`.
 
 ## Commands
 
-Every command works **at the workspace root** (runs both variants through turbo) and **at a variant
-root** (`variants/nextjs` or `variants/tanstack-start`, runs that variant only). Each command exits
-non-zero on failure. None of them watch, prompt or swallow errors.
+Run these at the repository root. Turbo runs each task in every package that defines it and caches
+the results. Add `--filter <package>` to limit a task to one package, for example
+`pnpm lint --filter web`.
 
-| Command                 | What it does                                                                                                                                                                                                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`              | Variant root: start that app (Next.js :3000, TanStack Start :3001). Root: `pnpm dev @repo/nextjs` or `pnpm dev @repo/tanstack-start` (Turbo filter, required)                                                                                                    |
-| `pnpm type-check`       | Runs framework typegen (`next typegen` / route tree generation), then `tsc --noEmit`                                                                                                                                                                             |
-| `pnpm lint`             | Oxlint with type-aware rules, warnings fail. Never writes files                                                                                                                                                                                                  |
-| `pnpm format:check`     | Oxfmt check. Never writes files                                                                                                                                                                                                                                  |
-| `pnpm test`             | Vitest one-shot (`vitest run`). Fails when no test files match                                                                                                                                                                                                   |
-| `pnpm test -- <filter>` | Run a single test file or filter. Example: `pnpm test -- src/lib/env.test.ts` in a variant root. Flags like `-t "<name>"` are forwarded too                                                                                                                      |
-| `pnpm check`            | Fast read-only check: format, types, lint, unit tests. Root also checks its own files (`tooling/`, docs, configs)                                                                                                                                                |
-| `pnpm build`            | Production build, no secrets or external services                                                                                                                                                                                                                |
-| `pnpm test:e2e`         | Production build, then Playwright starts the production server (Next.js :3100, TanStack Start :3101), waits for `/api/health`, runs the smoke tests and stops the server. Leaves `playwright-report/` and `test-results/` with traces and screenshots on failure |
-| `pnpm verify`           | `check` + `test:e2e` (production build + browser smoke)                                                                                                                                                                                                          |
-| `pnpm format`           | Write formatting fixes                                                                                                                                                                                                                                           |
-| `pnpm lint:fix`         | Apply Oxlint auto-fixes                                                                                                                                                                                                                                          |
+| Command         | What it does                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| `pnpm dev`      | Start the web app and the Expo dev server                                                |
+| `pnpm check`    | Format check, lint (type-aware), type-check and unit tests. Never writes files           |
+| `pnpm verify`   | `check`, production builds of both apps and the web end-to-end tests                     |
+| `pnpm build`    | Production build of the web app and an iOS + Android bundle of the mobile app            |
+| `pnpm test`     | Unit tests (Vitest). Run one file with `pnpm --filter @repo/api test src/router.test.ts` |
+| `pnpm test:e2e` | Build the web app, then run the Playwright smoke tests against it                        |
+| `pnpm format`   | Format all files (Oxfmt)                                                                 |
+| `pnpm lint:fix` | Apply Oxlint auto-fixes                                                                  |
 
-`pnpm format` and `pnpm lint:fix` are the only commands that write sources. Build and typegen output
-(`.next/`, `next-env.d.ts`, `dist/`, `src/routeTree.gen.ts`) is gitignored. CI fails if `verify`
-leaves any change in `git status`.
+The end-to-end tests need a browser once: `pnpm --filter web exec playwright install chromium`.
+
+## Common tasks
+
+- **Add an API procedure:** add it to `packages/api/src/router.ts`. Both apps get typed access
+  through their `orpc` helper in `src/lib/orpc.ts`.
+- **Add a UI component:** `pnpm --dir apps/web exec shadcn add <name>` for the web app and
+  `pnpm --dir apps/mobile dlx @react-native-reusables/cli@latest add <name>` for the mobile app.
+- **Change the theme:** edit `packages/ui/theme.css`. Themes generated for shadcn/ui can be pasted
+  into its `light` and `dark` blocks.
+- **Add an environment variable:** declare it in the app's `src/env.ts` and list it in its
+  `.env.example`.
+- **Remove the mobile app:** delete `apps/mobile` and the `mobile` job in
+  `.github/workflows/ci.yml`, then run `pnpm install`.
 
 ## CI
 
-`.github/workflows/ci.yml` runs on each push to `main` and on pull requests:
+`.github/workflows/ci.yml` runs on pull requests and pushes to `main`:
 
-- **Workspace**: `pnpm run check:root` (format and lint of root-level files).
-- **nextjs verify** / **tanstack-start verify**: a filtered install of only that variant, then
-  `pnpm run verify` in the variant root, then a clean `git status` check. Playwright artifacts are
-  uploaded on failure.
+- **Check:** `pnpm check`.
+- **Web build + e2e:** installs only the web app and its packages, builds it and runs Playwright.
+  Reports and traces are uploaded when a test fails.
+- **Mobile bundle:** installs only the mobile app and its packages and bundles it for iOS and
+  Android with `expo export`.
 
-CI calls the variant scripts directly, so no turbo cache can hide a skipped task. It uses no
-secrets, database, Docker or paid services.
+Every job fails if it changes a tracked file.
