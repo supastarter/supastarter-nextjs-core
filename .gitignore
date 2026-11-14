@@ -2,23 +2,9 @@ node_modules/
 .turbo/
 .DS_Store
 *.log
+*.tsbuildinfo
 .env
 .env.*
 !.env.example
-
-# Next.js
-.next/
-next-env.d.ts
-*.tsbuildinfo
-
-# TanStack Start / Vite
 dist/
-.output/
-.tanstack/
-src/routeTree.gen.ts
-
-# Test artifacts
 coverage/
-test-results/
-playwright-report/
-blob-report/

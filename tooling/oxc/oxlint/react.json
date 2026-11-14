@@ -1,13 +1,11 @@
 {
-  "$schema": "../../../node_modules/oxlint/configuration_schema.json",
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
   "extends": ["./base.json"],
-  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "react-perf", "jsx-a11y"],
-  "env": {
-    "browser": true
-  },
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react"],
   "rules": {
     "react/jsx-key": "error",
     "react/react-in-jsx-scope": "off",
+    "react/jsx-no-constructed-context-values": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error"
   }

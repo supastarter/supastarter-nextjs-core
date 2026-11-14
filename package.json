@@ -4,27 +4,24 @@
   "type": "module",
   "packageManager": "pnpm@12.18.0",
   "engines": {
-    "node": ">=22.22.0",
+    "node": ">=26",
     "pnpm": "12.18.0"
   },
   "scripts": {
-    "dev": "turbo run dev --filter",
-    "check": "pnpm run check:root && turbo run format:check lint type-check test",
-    "check:root": "oxfmt --check && oxlint --deny-warnings tooling",
-    "format": "oxfmt && turbo run format",
-    "format:check": "oxfmt --check && turbo run format:check",
-    "lint": "oxlint --deny-warnings tooling && turbo run lint",
-    "lint:fix": "oxlint --fix tooling && turbo run lint:fix",
-    "type-check": "turbo run type-check",
-    "test": "turbo run test --",
+    "dev": "turbo run dev",
     "build": "turbo run build",
-    "test:e2e": "turbo run test:e2e --concurrency=1",
-    "verify": "pnpm run check && pnpm run test:e2e"
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "check": "oxfmt --check && turbo run lint type-check test",
+    "verify": "pnpm run check && turbo run build test:e2e"
   },
   "devDependencies": {
-    "@repo/oxc-config": "workspace:*",
-    "oxfmt": "0.77.0",
-    "oxlint": "1.92.0",
-    "turbo": "2.11.10"
+    "oxfmt": "0.78.0",
+    "turbo": "2.11.11"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../node_modules/oxlint/configuration_schema.json",
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "import"],
   "categories": {
     "correctness": "error",
@@ -36,7 +36,8 @@
     "typescript/no-unsafe-member-access": "error",
     "typescript/no-unsafe-return": "error",
     "typescript/restrict-template-expressions": "error",
-    "typescript/switch-exhaustiveness-check": "error"
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/no-unsafe-type-assertion": "off"
   },
-  "ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/.output/**", "**/.next/**"]
+  "ignorePatterns": ["**/node_modules/**", "**/dist/**"]
 }

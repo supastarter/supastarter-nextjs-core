@@ -1,26 +1,30 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "ui": "stream",
+  "ui": "tui",
   "envMode": "strict",
   "globalDependencies": [".nvmrc", "tooling/**"],
   "tasks": {
-    "format:check": {},
-    "lint": {
-      "dependsOn": ["type-check"]
+    "transit": {
+      "dependsOn": ["^transit"]
     },
     "type-check": {
-      "outputs": [".next/types/**", "next-env.d.ts", "src/routeTree.gen.ts"]
+      "dependsOn": ["transit"],
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["transit", "type-check"],
+      "outputs": []
     },
     "test": {
+      "dependsOn": ["transit"],
       "outputs": []
     },
     "build": {
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": ["transit"],
+      "outputs": ["dist/**"]
     },
     "test:e2e": {
-      "cache": false
-    },
-    "format": {
+      "dependsOn": ["build"],
       "cache": false
     },
     "lint:fix": {
