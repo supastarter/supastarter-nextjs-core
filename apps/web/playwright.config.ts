@@ -6,7 +6,6 @@ const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "**/*.spec.ts",
   outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: isCI,
@@ -18,10 +17,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  // Serves the existing production build; `pnpm test:e2e` runs `pnpm build` first.
+  // Serves the production build. Run through `pnpm test:e2e` at the root, which builds first.
   webServer: {
     command: `pnpm exec next start --port ${PORT}`,
-    url: `${baseURL}/api/health`,
+    url: `${baseURL}/api/rpc/health`,
     reuseExistingServer: false,
     timeout: 60_000,
     stdout: "pipe",

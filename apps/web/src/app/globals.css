@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@repo/ui/theme.css";
+
+/* Follow the system color scheme. Tailwind's `dark` variant already does. */
+@custom-variant light (@media (prefers-color-scheme: light));
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
