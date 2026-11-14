@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "supastarter",
+    "slug": "supastarter",
+    "version": "1.0.0",
+    "scheme": "supastarter",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router"]
+  }
+}

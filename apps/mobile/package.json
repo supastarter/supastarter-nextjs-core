@@ -1,0 +1,49 @@
+{
+  "name": "mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "build": "expo export --platform ios --platform android",
+    "type-check": "tsc --noEmit",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "lint:fix": "oxlint --type-aware --fix"
+  },
+  "dependencies": {
+    "@orpc/client": "1.16.2",
+    "@orpc/tanstack-query": "1.16.2",
+    "@repo/api": "workspace:*",
+    "@rn-primitives/portal": "1.5.3",
+    "@rn-primitives/slot": "1.5.2",
+    "@t3-oss/env-core": "0.13.11",
+    "@tanstack/react-query": "5.107.1",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "expo": "58.0.25",
+    "expo-constants": "58.0.16",
+    "expo-linking": "58.0.17",
+    "expo-router": "58.0.31",
+    "expo-status-bar": "58.0.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "5.11.1",
+    "react-native-screens": "4.30.1",
+    "tailwind-merge": "3.7.0",
+    "uniwind": "1.13.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@repo/oxc-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@types/react": "19.3.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2007",
+    "tailwindcss": "4.3.5",
+    "typescript": "7.0.2"
+  }
+}
