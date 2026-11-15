@@ -6,7 +6,11 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router/react-naviga
 import { StatusBar } from "expo-status-bar";
 import { useUniwind } from "uniwind";
 
+import { restoreColorMode } from "@/lib/color-mode";
+
 export { ErrorBoundary } from "expo-router";
+
+restoreColorMode();
 
 const queryClient = new QueryClient();
 
