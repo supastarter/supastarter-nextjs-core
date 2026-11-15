@@ -45,16 +45,28 @@ does for uptime checks (`GET /api/rpc/health`).
 
 Each app imports the file from its global stylesheet and decides what `light` and `dark` mean:
 
-- **Web** (`apps/web/src/app/globals.css`): Tailwind CSS. `light` and `dark` follow the
-  `prefers-color-scheme` media query.
+- **Web** (`apps/web/src/app/globals.css`): Tailwind CSS. `dark` applies under the `dark` class on
+  `<html>`, which next-themes sets; `light` applies otherwise.
 - **Mobile** (`apps/mobile/src/global.css`): Uniwind compiles the same file at bundle time and
-  switches themes with the device setting.
+  switches between the `light` and `dark` themes at runtime.
+
+Both apps offer a System, Light and Dark color mode control (`src/components/color-mode-toggle.tsx`).
+System is the default and follows the device setting.
+
+- **Web:** next-themes stores the choice in `localStorage` and sets the class on `<html>` before
+  the page paints, so there is no flash of the wrong theme. Read or change the mode with
+  `useTheme()` from `next-themes`.
+- **Mobile:** `src/lib/color-mode.ts` applies the choice with `Uniwind.setTheme`, which also sets
+  the color scheme of native views, and stores it with `expo-sqlite/kv-store`. The root layout
+  restores it synchronously before the first render.
 
 Components are copied into each app by their CLI and can be edited freely:
 
-- **Web:** shadcn/ui (Radix base) in `apps/web/src/components/ui`.
-- **Mobile:** React Native Reusables in `apps/mobile/src/components/ui`. They mirror the shadcn/ui
-  APIs, including `asChild`.
+- **Web:** shadcn/ui on Base UI primitives in `apps/web/src/components/ui`. Components that render a
+  different element take a `render` prop, for example `<Button render={<a href="/" />} />`.
+- **Mobile:** React Native Reusables in `apps/mobile/src/components/ui`, the React Native port of
+  shadcn/ui. Icons use `lucide-react-native` through the `Icon` component. Animations use
+  `react-native-reanimated`; Expo's Babel preset compiles its worklets without extra configuration.
 
 ## Environment variables
 
@@ -73,7 +85,8 @@ Each app's `.env.example` lists exactly the variables that app reads.
 - **Unit tests:** Vitest, for plain TypeScript in packages (`src/**/*.test.ts`). `packages/api`
   tests procedures directly and through the HTTP handler with the typed client.
 - **Web end-to-end:** Playwright runs `apps/web/e2e` against the production build. The smoke tests
-  load the home page, which renders data from the API, and call the API over HTTP.
+  load the home page, which renders data from the API, switch the color mode and call the API over
+  HTTP.
 - **Mobile:** the CI gate is type-check, lint and an `expo export` bundle for iOS and Android. Keep
   screens thin and put logic in packages, where Vitest covers it.
 

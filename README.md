@@ -10,9 +10,10 @@ A TypeScript monorepo for building a web app and a mobile app on one typed API.
 | `packages/ui`  | Design tokens (colors, radii) shared by both apps                                |
 | `tooling/*`    | Shared TypeScript and Oxlint configuration                                       |
 
-The web app uses Tailwind CSS and shadcn/ui. The mobile app uses Uniwind (Tailwind CSS for React
-Native) and React Native Reusables, the React Native port of shadcn/ui. Both read the same tokens
-from `packages/ui/theme.css` and follow the system light or dark mode.
+The web app uses Tailwind CSS and shadcn/ui on Base UI. The mobile app uses Uniwind (Tailwind CSS
+for React Native), React Native Reusables (the React Native port of shadcn/ui) and Reanimated. Both
+read the same tokens from `packages/ui/theme.css` and let the user pick a System, Light or Dark color
+mode, with System as the default.
 
 See [`docs/architecture.md`](docs/architecture.md) for how the pieces fit together.
 
