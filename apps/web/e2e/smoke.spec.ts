@@ -1,4 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+const background = (page: Page) =>
+  page.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor);
 
 test("home page renders data from the API", async ({ page }) => {
   const errors: string[] = [];
@@ -15,18 +18,44 @@ test("home page renders data from the API", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test("theme tokens follow the system color scheme", async ({ page }) => {
-  const backgroundFor = async (colorScheme: "light" | "dark") => {
-    await page.emulateMedia({ colorScheme });
-    return page.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor);
-  };
-
+test("color mode defaults to system and follows the system color scheme", async ({ page }) => {
+  const html = page.locator("html");
+  await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
-  const light = await backgroundFor("light");
-  const dark = await backgroundFor("dark");
+
+  await expect(page.getByRole("button", { name: "System" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(html).toContainClass("light");
+  const light = await background(page);
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(html).toContainClass("dark");
+  const dark = await background(page);
 
   expect(light).not.toBe("rgba(0, 0, 0, 0)");
   expect(dark).not.toBe(light);
+});
+
+test("a chosen color mode overrides the system and survives a reload", async ({ page }) => {
+  const html = page.locator("html");
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await expect(html).toContainClass("light");
+  const light = await background(page);
+
+  await page.getByRole("button", { name: "Dark" }).click();
+  await expect(html).toContainClass("dark");
+  expect(await background(page)).not.toBe(light);
+
+  await page.reload();
+  await expect(html).toContainClass("dark");
+  await expect(page.getByRole("button", { name: "Dark" })).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: "System" }).click();
+  await expect(html).toContainClass("light");
+  expect(await background(page)).toBe(light);
 });
 
 test("API serves procedures over HTTP", async ({ request }) => {

@@ -3,14 +3,14 @@
 @import "shadcn/tailwind.css";
 @import "@repo/ui/theme.css";
 
-/* Follow the system color scheme. Tailwind's `dark` variant already does. */
-@custom-variant light (@media (prefers-color-scheme: light));
+/*
+ * next-themes sets the `light` or `dark` class on <html>. Without a class, for
+ * example with JavaScript disabled, the light theme applies.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(:not(.dark, .dark *)));
 
 @layer base {
-  :root {
-    color-scheme: light dark;
-  }
-
   * {
     @apply border-border outline-ring/50;
   }
