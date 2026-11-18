@@ -1,16 +1,14 @@
 # AGENTS.md
 
 Guidance for agents working in this repository. [`docs/architecture.md`](docs/architecture.md)
-explains how the apps and packages fit together.
+explains how the web app and packages fit together.
 
 ## Where things go
 
 - API procedures: `packages/api/src/router.ts`. Validate every input with Zod.
-- Web pages and routes: `apps/web/src/app`. Mobile screens: `apps/mobile/src/app` (Expo Router).
+- Web pages and routes: `apps/web/src/app`.
 - Colors and radii: `packages/ui/theme.css`. Never hard-code colors in components.
-- Logic shared by both apps belongs in a package, not in an app. Keep mobile screens thin.
-- UI components: add them with the shadcn CLI (web) or the React Native Reusables CLI (mobile),
-  then edit the copied files. Don't hand-write a component either CLI provides.
+- UI components: add them with the shadcn CLI, then edit the copied files.
 - Environment variables: declare them in the app's `src/env.ts`, read them only through `env`, and
   list them in the app's `.env.example`.
 
@@ -31,5 +29,5 @@ Run from the repository root:
 ```sh
 pnpm format   # fix formatting
 pnpm check    # format check, lint, type-check, unit tests
-pnpm verify   # check + production builds + web end-to-end tests
+pnpm verify   # check + production build + web end-to-end tests
 ```

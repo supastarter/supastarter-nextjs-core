@@ -1,5 +1,0 @@
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/@repo/oxc-config/oxlint/react.json"],
-  "ignorePatterns": [".expo/**", "dist/**", "metro.config.js", "src/uniwind-types.d.ts"]
-}

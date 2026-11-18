@@ -59,23 +59,3 @@ jobs:
             apps/web/test-results
           if-no-files-found: ignore
           retention-days: 7
-
-  # Delete this job together with apps/mobile.
-  mobile:
-    name: Mobile bundle
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      EXPO_NO_TELEMETRY: "1"
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      # Installs only the mobile app and the packages it uses.
-      - run: pnpm install --frozen-lockfile --filter "mobile..."
-      - run: pnpm --filter mobile build
-      - name: Ensure no tracked files changed
-        run: test -z "$(git status --porcelain)" || (git status --porcelain && exit 1)

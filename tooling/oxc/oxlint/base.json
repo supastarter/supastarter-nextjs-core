@@ -13,7 +13,6 @@
   "rules": {
     "eqeqeq": "error",
     "no-console": ["error", { "allow": ["warn", "error"] }],
-    "import/namespace": "off",
     "import/no-cycle": "error",
     "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
     "typescript/ban-ts-comment": [

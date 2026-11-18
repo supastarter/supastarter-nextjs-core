@@ -5,7 +5,6 @@ A pnpm workspace orchestrated by Turborepo.
 ```
 apps/
   web/        Next.js app: pages + API route (name: web)
-  mobile/     Expo app for iOS and Android (name: mobile)
 packages/
   api/        @repo/api: oRPC router, request handler, typed client
   ui/         @repo/ui: theme tokens
@@ -14,8 +13,8 @@ tooling/
   oxc/        @repo/oxc-config: Oxlint presets
 ```
 
-Workspace packages export TypeScript source directly. They have no build step; each app compiles
-them as part of its own build.
+Workspace packages export TypeScript source directly. The web app compiles them as part of its
+build.
 
 ## API
 
@@ -26,12 +25,8 @@ them as part of its own build.
 - `@repo/api/client` exports `createApiClient`, which returns a client typed from the router. It
   imports only types from the server code, so no server code reaches a bundle.
 
-Each app wraps the client with `createTanstackQueryUtils` in `src/lib/orpc.ts` and calls procedures
-through TanStack Query, for example `useQuery(orpc.greeting.queryOptions({ input }))`.
-
-The mobile app has no server of its own. It calls the API served by the web app at
-`EXPO_PUBLIC_API_URL`. In development that defaults to port 3000 on the machine running the Expo dev
-server, so simulators and physical devices on the same network both work.
+The web app wraps the client with `createTanstackQueryUtils` in `apps/web/src/lib/orpc.ts` and calls
+procedures through TanStack Query, for example `useQuery(orpc.greeting.queryOptions({ input }))`.
 
 Procedures accept POST. A procedure opts in to GET with `.route({ method: "GET" })`, as `health`
 does for uptime checks (`GET /api/rpc/health`).
@@ -43,42 +38,22 @@ does for uptime checks (`GET /api/rpc/health`).
 - A `light` and a `dark` block set the raw values (`--background`, `--primary`, …).
 - `@theme inline` maps them to Tailwind utilities (`bg-background`, `text-primary`, `rounded-lg`, …).
 
-Each app imports the file from its global stylesheet and decides what `light` and `dark` mean:
+The web app imports the tokens in `apps/web/src/app/globals.css`. The `dark` variant applies under
+the `dark` class on `<html>`, and `light` applies otherwise.
 
-- **Web** (`apps/web/src/app/globals.css`): Tailwind CSS. `dark` applies under the `dark` class on
-  `<html>`, which next-themes sets; `light` applies otherwise.
-- **Mobile** (`apps/mobile/src/global.css`): Uniwind compiles the same file at bundle time and
-  switches between the `light` and `dark` themes at runtime.
+The color mode control (`apps/web/src/components/color-mode-toggle.tsx`) offers System, Light and
+Dark. System is the default and follows the device setting. Next-themes stores the choice in
+`localStorage` and sets the class on `<html>` before the page paints. Read or change the mode with
+`useTheme()` from `next-themes`.
 
-Both apps offer a System, Light and Dark color mode control (`src/components/color-mode-toggle.tsx`).
-System is the default and follows the device setting.
-
-- **Web:** next-themes stores the choice in `localStorage` and sets the class on `<html>` before
-  the page paints, so there is no flash of the wrong theme. Read or change the mode with
-  `useTheme()` from `next-themes`.
-- **Mobile:** `src/lib/color-mode.ts` applies the choice with `Uniwind.setTheme`, which also sets
-  the color scheme of native views, and stores it with `expo-sqlite/kv-store`. The root layout
-  restores it synchronously before the first render.
-
-Components are copied into each app by their CLI and can be edited freely:
-
-- **Web:** shadcn/ui on Base UI primitives in `apps/web/src/components/ui`. Components that render a
-  different element take a `render` prop, for example `<Button render={<a href="/" />} />`.
-- **Mobile:** React Native Reusables in `apps/mobile/src/components/ui`, the React Native port of
-  shadcn/ui. Icons use `lucide-react-native` through the `Icon` component. Animations use
-  `react-native-reanimated`; Expo's Babel preset compiles its worklets without extra configuration.
+The shadcn CLI copies components based on Base UI into `apps/web/src/components/ui`. Components that
+render a different element take a `render` prop, for example `<Button render={<a href="/" />} />`.
 
 ## Environment variables
 
-Each app validates its variables with t3-env and Zod in `src/env.ts` and reads them only from the
-exported `env` object:
-
-- **Web:** `@t3-oss/env-nextjs`. `next.config.ts` imports the module, so `next build` fails on a
-  missing or invalid variable.
-- **Mobile:** `@t3-oss/env-core`. Only `EXPO_PUBLIC_` variables exist, and Expo inlines them into the
-  bundle, so they must never hold secrets.
-
-Each app's `.env.example` lists exactly the variables that app reads.
+The web app validates its variables with `@t3-oss/env-nextjs` and Zod in `apps/web/src/env.ts` and
+reads them through the exported `env` object. The Next.js config imports the module so
+`next build` validates the environment. See `apps/web/.env.example` for the supported variables.
 
 ## Testing
 
@@ -87,8 +62,6 @@ Each app's `.env.example` lists exactly the variables that app reads.
 - **Web end-to-end:** Playwright runs `apps/web/e2e` against the production build. The smoke tests
   load the home page, which renders data from the API, switch the color mode and call the API over
   HTTP.
-- **Mobile:** the CI gate is type-check, lint and an `expo export` bundle for iOS and Android. Keep
-  screens thin and put logic in packages, where Vitest covers it.
 
 ## Tooling
 

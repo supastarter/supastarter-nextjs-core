@@ -6,5 +6,5 @@
   "sortTailwindcss": {
     "functions": ["cn", "cva"]
   },
-  "ignorePatterns": ["pnpm-lock.yaml", "**/uniwind-types.d.ts"]
+  "ignorePatterns": ["pnpm-lock.yaml"]
 }
