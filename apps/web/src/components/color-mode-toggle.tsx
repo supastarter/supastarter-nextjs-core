@@ -27,9 +27,8 @@ export function ColorModeToggle() {
   return (
     <ToggleGroup
       aria-label="Color mode"
-      size="sm"
       spacing={0.5}
-      className="bg-muted p-0.5"
+      className="bg-muted rounded-full p-0.5"
       value={hydrated && theme ? [theme] : []}
       onValueChange={([value]) => {
         if (value) {
@@ -41,10 +40,11 @@ export function ColorModeToggle() {
         <ToggleGroupItem
           key={value}
           value={value}
-          className="aria-pressed:bg-background dark:aria-pressed:bg-input/30 hover:bg-transparent aria-pressed:shadow-sm"
+          aria-label={label}
+          title={label}
+          className="text-muted-foreground hover:text-foreground aria-pressed:border-border aria-pressed:bg-background aria-pressed:text-foreground size-8 rounded-full border border-transparent p-0 hover:bg-transparent"
         >
-          <Icon data-icon="inline-start" />
-          {label}
+          <Icon className="size-3.5" aria-hidden="true" />
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

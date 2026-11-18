@@ -13,13 +13,26 @@ test("home page renders data from the API", async ({ page }) => {
   const response = await page.goto("/");
 
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1, name: "supastarter" })).toBeVisible();
+  const heading = page.getByRole("heading", { level: 1, name: "supastarter" });
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveCSS("font-family", /DM Sans Variable/);
+  await expect(page.locator("body")).toHaveCSS("font-family", /Inter Variable/);
   await expect(page.getByText("Hello, supastarter!")).toBeVisible();
+
+  await page.getByRole("link", { name: "Try the API" }).click();
+  await expect(page).toHaveURL(/#api-preview$/);
+  const [refetch] = await Promise.all([
+    page.waitForResponse("**/api/rpc/greeting"),
+    page.getByRole("button", { name: "Refetch" }).click(),
+  ]);
+  expect(refetch.ok()).toBe(true);
   expect(errors).toEqual([]);
 });
 
 test("color mode defaults to system and follows the system color scheme", async ({ page }) => {
   const html = page.locator("html");
+  const paletteColor = (token: string) =>
+    html.evaluate((root, name) => getComputedStyle(root).getPropertyValue(name).trim(), token);
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
 
@@ -28,10 +41,12 @@ test("color mode defaults to system and follows the system color scheme", async 
     "true",
   );
   await expect(html).toContainClass("light");
+  await expect(html).toHaveCSS("--background", await paletteColor("--color-olive-50"));
   const light = await background(page);
 
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(html).toContainClass("dark");
+  await expect(html).toHaveCSS("--background", await paletteColor("--color-olive-950"));
   const dark = await background(page);
 
   expect(light).not.toBe("rgba(0, 0, 0, 0)");

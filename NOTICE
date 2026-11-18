@@ -15,7 +15,7 @@ Vendored third-party code
 
 shadcn/ui
 https://github.com/shadcn-ui/ui
-Paths: apps/web/src/components/ui/, the color values in packages/ui/theme.css
+Paths: apps/web/src/components/ui/
 
 MIT License
 

@@ -33,13 +33,14 @@ does for uptime checks (`GET /api/rpc/health`).
 
 ## UI and theming
 
-`packages/ui/theme.css` defines the color and radius tokens once, using the shadcn/ui token names:
+`packages/ui/theme.css` defines the olive palette from supastarter for Next.js, using the
+shadcn/ui token names.
 
-- A `light` and a `dark` block set the raw values (`--background`, `--primary`, …).
+- `:root` sets the light values and `.dark` overrides them for dark mode.
 - `@theme inline` maps them to Tailwind utilities (`bg-background`, `text-primary`, `rounded-lg`, …).
 
-The web app imports the tokens in `apps/web/src/app/globals.css`. The `dark` variant applies under
-the `dark` class on `<html>`, and `light` applies otherwise.
+The web app imports the tokens in `apps/web/src/app/globals.css` and defines the page gradient and
+typography there. Inter and DM Sans are served locally from the Fontsource packages.
 
 The color mode control (`apps/web/src/components/color-mode-toggle.tsx`) offers System, Light and
 Dark. System is the default and follows the device setting. Next-themes stores the choice in

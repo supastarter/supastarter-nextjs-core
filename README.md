@@ -9,8 +9,9 @@ A TypeScript monorepo for building a Next.js web app with a typed API.
 | `packages/ui`  | Tailwind CSS design tokens (colors, radii)                          |
 | `tooling/*`    | Shared TypeScript and Oxlint configuration                          |
 
-The web app uses Tailwind CSS and shadcn/ui on Base UI. It reads tokens from
-`packages/ui/theme.css` and offers System, Light and Dark color modes, with System as the default.
+The web app uses Tailwind CSS and shadcn/ui on Base UI, with the olive palette and Inter and DM Sans
+typefaces from supastarter for Next.js. It offers System, Light and Dark color modes, with System as
+the default.
 
 See [`docs/architecture.md`](docs/architecture.md) for how the pieces fit together.
 
@@ -56,8 +57,7 @@ The end-to-end tests need a browser once: `pnpm --filter web exec playwright ins
 - **Add an API procedure** in `packages/api/src/router.ts`. The web app gets typed access
   through the `orpc` helper in `apps/web/src/lib/orpc.ts`.
 - **Add a UI component** with `pnpm --dir apps/web exec shadcn add <name>`.
-- **Change the theme:** edit `packages/ui/theme.css`. Themes generated for shadcn/ui can be pasted
-  into its `light` and `dark` blocks.
+- **Change the theme** by editing the `:root` and `.dark` tokens in `packages/ui/theme.css`.
 - **Add an environment variable:** declare it in the app's `src/env.ts` and list it in its
   `.env.example`.
 
