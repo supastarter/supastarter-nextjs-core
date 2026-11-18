@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./node_modules/@repo/oxc-config/oxlint/react.json"],
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "jsx-a11y", "nextjs"],
+  "env": {
+    "browser": true
+  },
+  "rules": {
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css", "./src/env"] }]
+  },
+  "overrides": [
+    {
+      "files": ["*.config.ts", "e2e/**"],
+      "env": {
+        "node": true
+      }
+    }
+  ],
+  "ignorePatterns": ["next-env.d.ts", ".next/**", "test-results/**", "playwright-report/**"]
+}
