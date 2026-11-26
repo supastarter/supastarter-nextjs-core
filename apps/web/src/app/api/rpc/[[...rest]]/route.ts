@@ -1,8 +1,7 @@
 import { handleApiRequest } from "@repo/api/server";
 
-function handler(request: Request) {
-  return handleApiRequest(request, "/api/rpc");
-}
+const handler = async (request: Request) =>
+  await handleApiRequest(request, "/api/rpc");
 
 export {
   handler as DELETE,
