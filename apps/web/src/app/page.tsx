@@ -4,7 +4,13 @@ import Link from "next/link";
 import { ColorModeToggle } from "@/components/color-mode-toggle";
 import { Greeting } from "@/components/greeting";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -33,7 +39,10 @@ export default function HomePage() {
         <p className="text-muted-foreground mt-6 max-w-xl text-base leading-relaxed text-pretty sm:text-lg">
           A Next.js starter with a typed API and a ready-to-use design system.
         </p>
-        <a href="#api-preview" className={buttonVariants({ size: "lg", className: "mt-8" })}>
+        <a
+          href="#api-preview"
+          className={buttonVariants({ size: "lg", className: "mt-8" })}
+        >
           Try the API <ArrowRightIcon aria-hidden="true" />
         </a>
 
@@ -49,18 +58,24 @@ export default function HomePage() {
             </div>
             <CardHeader className="pt-6">
               <CardTitle>
-                <h2 id="api-title" className="text-xl font-medium tracking-tight">
+                <h2
+                  id="api-title"
+                  className="text-xl font-medium tracking-tight"
+                >
                   Live API demo
                 </h2>
               </CardTitle>
-              <CardDescription>This greeting comes from the oRPC endpoint.</CardDescription>
+              <CardDescription>
+                This greeting comes from the oRPC endpoint.
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-5">
               <Greeting />
             </CardContent>
           </Card>
           <p className="text-muted-foreground mt-6 text-sm">
-            Edit <code>apps/web/src/app/page.tsx</code> to make this page your own.
+            Edit <code>apps/web/src/app/page.tsx</code> to make this page your
+            own.
           </p>
         </section>
       </main>

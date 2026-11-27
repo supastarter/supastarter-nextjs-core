@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: "Built with supastarter.",
 };
 
-export default function RootLayout({ children }: { readonly children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
   return (
     // next-themes sets the color mode class on <html> before React hydrates.
     <html lang="en" suppressHydrationWarning>

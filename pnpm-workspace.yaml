@@ -4,3 +4,4 @@ packages:
   - tooling/*
 
 engineStrict: true
+minimumReleaseAge: 1440

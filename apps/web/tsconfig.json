@@ -3,8 +3,15 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "strictNullChecks": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next/cache", "test-results", "playwright-report"]
+  "exclude": [
+    "node_modules",
+    ".next/cache",
+    "test-results",
+    "playwright-report",
+    "oxlint.config.ts"
+  ]
 }
